@@ -96,4 +96,35 @@
     * delicious
     * color
 
-    B. 
+    B. There is one column in every table that is going to be **required** - ID. Unlike a spreadsheet, every row needs some unique ID. The ID is referred to as the _Primary Key_. Every table has to have a primary key column. 
+    * It doesn't necessarily have to be _ID_ - it can be anything, as we can name the column whatever we want - but it is still important to follow conventions. 
+    * The primary key can be any type of value. It does not have to be an integer. 
+    * As long as no 2 rows in the table try to use the same ID, the type does not matter. It can be a string if it needed to be. 
+    * As long as that value is unique, that is a valid primary key. 
+    * It usually defaults to an auto-incrementing integer making it unique.
+    * Once the row of the primary key is created, you should **not** try to go back in and change that key. **Set in stone.**
+
+    C. What are the different _types_ of the other columns. 
+    * Integer - for the ID
+    * Text - for the name and color
+    * Float - for the avgWeightOz
+    * Boolean - delicious
+    
+    D. The data types that are available for us to use are dependent upon the DBMS. In this case, these are some of the [types available in SQLite](https://www.sqlite.org/datatype3.html). 
+    * Null - essentially used for empty values. If a column is empty, we use the null value. 
+    * Integer - for storing whole numbers (no decimals)
+    * Real - for storing numbers that do have a decimal; not whole numbers
+    * Text - just storing a piece of text as a string
+    * Blob - used for storing some type of binary data (for example, an image)
+
+    E. For the data types like Float and Boolean that you see in the database, SQLite converts them into one of the 5 data types listed in the above documentation. 
+    * In the documentation, scroll down to the section on Type Affinity. This is where it goes into detail about that. 
+    * Once you move on into Postgre, all those typenames will get converted and supported natively. 
+
+    F. On top of enforcing certain data types for each column, we can also enforce other constraints
+    * Making sure it's a unique value
+    * Make sure it's not empty
+    * Give columns default values
+    * Prevent a row from being created if a value is empty (`NOT NULL`)
+
+    G. If you try to insert a row that doesn't fall into the set constraints, you'll get an error in the database. 
