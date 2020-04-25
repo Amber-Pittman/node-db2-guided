@@ -432,5 +432,21 @@ Before we get to our schema builder commands, let's get the Knex command line in
 
     F. Now, anytime we want to run a SQL command or we want to talk to our database, we just have to import this instance of knex. We can now call our query builder functions. 
 
-3. 
+    * `db().where().select()`
+    
+    * `knex().where().select()`
+
+3. Once you have both the instance file and the knex configuration ready, go into the fruits router. 
+
+    A. Import the instance of next from config.js. 
+
+    B. In the fruits-router, you'll already see we have some config in the file. It was previously defined so that we could test the endpoints. It's doing the same thing as what we wrote in knexfile. Therefore, you can just remove it from the fruits router. 
+
+    C. Delete the import of knex in the fruits router. 
+
+    D. Import the instance we just created. You can call it db or instance - whatever you want.
+    ```
+    const db = require("../data/config")
+    ```
+    E. Since that is now connected to our database, we can call all of our queries.  
 
