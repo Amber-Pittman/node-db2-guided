@@ -553,3 +553,83 @@ Before we get to our schema builder commands, let's get the Knex command line in
         * We can create a bunch of these migration files over time, as our schema changes, and we now have a replicable and a reversible history of how the database schema got to where its at. 
 
 6. Implement Schema Migrations with Knex
+
+    A. Knex is a migration library that we can use to implement this concept. 
+
+    B. You'll need to disconnect from DB Browser by clicking on the Close Database button. Doing so releases the lockfile from your file system.  
+
+    C. Delete that produce.db3 file again.
+
+    D. Create a new migration file in the terminal and name the table fruits.
+        ```
+        npx knex migrate:make fruits
+        ```
+
+    E. Look in your code. You will see an autopopulated migrations folder. It houses the migrations file you just created. 
+
+    F. The file name is quite long. It's a timestamped file while still being named fruits. 
+
+    * YearMonthDayHHMMSS_fruits.js
+
+    * It's important that the timestamp is in the name for the order of migrations. They have to run in the order they were created. 
+
+    G. In the migrations file, we have 2 functions. Delete the semicolons. 
+
+    * We have an up function. In it, we essentially put our schema builder code that creates or changes our schema in some way. It moves our database 1 step forward. 
+
+        * Let's recreate our fruits table using this migration with the up function. 
+
+            * Remember, just like knex helps us with our query building, it helps us with our schema building as well (DDL functions). 
+
+            * We have this instance of knex. It gives us this this instance of knex that just comes from the knex CLI (when we used the npx command earlier, we accessed the CLI). It came pre-configured and connected to database. We can use that to call knex in certain functions. 
+
+            * Behind the scenes, Knex is going to construct a CREATE TABLE SQL statement and send that through to the database. It's going to create that table of fruits. 
+
+            ```
+            exports.up = function(knex) {
+                knex.schema.createTable("fruits")
+            }
+            ```
+
+            * This function returns a promise. You need to make it async/await. 
+
+            ```
+            exports.up = async function(knex) {
+                await knex.schema.createTable("fruits")
+            }
+            ```
+
+            * The first parameter is the table name ("fruits"). The 2nd parameter is going to be a callback. The callback function is going to give us access to parameter, a variable, called "table." That table variable we can use to actually create our columns. 
+
+            ```
+            exports.up = async function(knex) {
+                await knex.schema.createTable("fruits", () => {
+                    // table.integer("id").notNull().primary() - creates ID column
+
+                    // Can shorten previous code to increments. 
+                        // Creates an autoincrementing column with all of those values
+                    table.increments("id") 
+
+                    table.text("name").notNull().unique()
+
+                    table.float("avgWeightOz").notNull()
+
+                    table.boolean("delicious").notNull().default(true)
+
+                    // We're intentionally leaving out the color for later.
+                })
+            }
+            ```
+            
+            * Make sure your produce files aren't there anymore before you do the next step.
+            
+            *  Go to the terminal. `npx knex migration:latest`
+
+                * When you run it, it's going to say "batch 1 run migrations" and its going to create a produce.db3 file in your data folder. 
+
+            * Open the new produce file in DB Browser and you'll see it's created the same schema as we did before in the migrations file. 
+
+    * We have a down function
+        ```
+        exports.down = function(knex) {}
+        ```
