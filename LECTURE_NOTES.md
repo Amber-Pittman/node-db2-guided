@@ -287,19 +287,19 @@
 
     H. Our database now has all the types and all the constraints!
 
-        * If you try running the command again without changing anything, you will get an error saying "fruits" already exists. 
+    * If you try running the command again without changing anything, you will get an error saying "fruits" already exists. 
 
-        * A way to check if the table exists is to include IF NOT EXISTS into the command. That way, if it does exist, it will just skip over that command. If it does not exist, it will create it.
+    * A way to check if the table exists is to include IF NOT EXISTS into the command. That way, if it does exist, it will just skip over that command. If it does not exist, it will create it.
 
-        ```
-        CREATE TABLE IF NOT EXISTS "fruits" (
-            "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-            "name" TEXT NOT NULL UNIQUE,
-            "avgWeightOz" FLOAT NOT NULL,
-            "delicious" BOOLEAN NOT NULL DEFAULT true,
-            "color" TEXT
-        );
-        ```
+    ```
+    CREATE TABLE IF NOT EXISTS "fruits" (
+        "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        "name" TEXT NOT NULL UNIQUE,
+        "avgWeightOz" FLOAT NOT NULL,
+        "delicious" BOOLEAN NOT NULL DEFAULT true,
+        "color" TEXT
+    );
+    ```
 
 12. What if we wanted to add a column later down the road to this fruits table? This is where we use the ALTER TABLE command. 
 
