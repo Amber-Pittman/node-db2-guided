@@ -29,7 +29,9 @@
 9. MySQL and Postgres are better suited for real-world applications of backend data. But SQLite will help build up your skills. 
 
 
-# Background & Start of Code Along
+# Code Along
+
+### SQL
 
 1. Start Server
     `npm run server`
@@ -347,11 +349,86 @@
     DROP TABLE IF EXISTS "fruits";
     ```
 
+15. What would happen if you already had data and needed to change the schema? 
+
+* When we run the ALTER TABLE command, that's not doing anything to the data. The data just stays where it is. Instead, it changes the table around the data. 
+
+* Essentially, if we already had a list of 10 fruits in our database and ran ALTER TABLE to add the tropical column, the result would be that all 10 fruits would now have that column and their values would be false because of the default. 
+
+* Our schema can change around our data but we're not messing _with_ our data.
 
 
+### KnexJS
 
+During the last lecture, we learned how to use Knex as a query builder. We learned how to create SQL statements from JavaScript and send them to the database. 
 
+Turns out, Knex is not only a query builder, but a schema builder as well. That means we can use it to run our DDL commands in addition to our DQL and DML commands. We can use it to actually create the schema of our database. 
 
+Before we get to our schema builder commands, let's get the Knex command line interface working. When we install KnexJS through npm, it also installs a CLI app to do a lot of really useful things. 
 
+1. Setup Knex and its CLI
 
+    A. Jump into your terminal. 
+
+    B. Make sure you are in the root of your project. 
+
+    C. Install and initial Knex
+
+        `npx knex init`
+
+    D. This created a new file - `./knexfile.js` - that's now in your file system.
+
+    * Delete all of its boilerplate because we're going to write it all from scratch. 
+    ```
+    module.exports = {
+        // specify some things
+    }
+    ```
+
+    * This is how we define our database connection. We're telling Knex how to connect to our actual database. 
+
+    E. The first thing we're going to specify some things inside the exports module.
+    
+        1. The CLIENT. The client is sqlite3.
+
+        2. A connection object. Here, we'll tell knex where our database file is. 
+
+        3. Lastly, because of some underlying options using Knex and how they work with SQLite, we have to tell it to use null as default (above the connection). Set the default to true. That's just required in order for SQLite and Knex to work properly with `null` values. 
+
+        ```
+        module.exports = {
+            client: "sqlite3",
+            useNullAsDefault: true, // Flag REQUIRED for SQLite to work
+            connection: {
+                filename: "./data/produce.db3" // location of our db file
+            }
+        }
+        ```
+
+2. Now that we have our Knex configuration set up, we need to create an actual instance of Knex. We need an instance that's connected to the database that we can use to run SQL commands. It's really, really easy.
+
+    A. Create a new file in the Data folder. 
+
+    B. Name the new file.
+    
+    * `config.js || databaseConfig.js || dbConfig.js || instance.js || db.js`. Whatever you want to call it, just as long as it's clear that this is the Knex instance. 
+
+    C. Import knex. 
+
+    D. Import the `knexfile.js` file into this instance. 
+
+    E. Export config and call knex and pass in the knexfile config. 
+
+    ```
+    // config.js
+
+    const knex = require("knex")
+    const knexfile = require("../knexfile")
+
+    module.exports = knex(knexfile)
+    ```
+
+    F. Now, anytime we want to run a SQL command or we want to talk to our database, we just have to import this instance of knex. We can now call our query builder functions. 
+
+3. 
 
