@@ -1,4 +1,6 @@
-# Notes
+# DATABASE SCHEMA DESIGN
+
+## Notes
 
 1. What type of Database have we been working with up to now? 
 
@@ -29,7 +31,7 @@
 9. MySQL and Postgres are better suited for real-world applications of backend data. But SQLite will help build up your skills. 
 
 
-# Code Along
+## Code Along
 
 ### SQL
 
@@ -627,11 +629,36 @@ Before we get to our schema builder commands, let's get the Knex command line in
             
             *  Go to the terminal. `npx knex migration:latest`
 
-                * When you run it, it's going to say "batch 1 run migrations" and its going to create a produce.db3 file in your data folder. 
+                * When you run it, it's going to say `Batch 1 run: migrations` and its going to create a produce.db3 file in your data folder. 
 
             * Open the new produce file in DB Browser and you'll see it's created the same schema as we did before in the migrations file. 
 
     * Down Function
+
+        * Remember, our schema migrations should _always_ be reversible. 
+
+        * In the event that we have to rollback a migration due to a bug or an error, we should be able to rollback any particular changes we made in this migration file.
+
+        * Our down function should _always_ reverse whatever happens in our up function. It's like moving back 1 step in time; making it like the migration never ran at all. We just want to drop the table. 
+
+        * Mark the down function as an async function. Then add await when calling knex for the schema to drop the table if "fruits" exists. 
+
         ```
-        exports.down = function(knex) {}
+        exports.down = async function(knex) {
+            await.knex.schema.dropTableIfExists("fruits")
+        }
         ```
+
+        * In the terminal, we can run the down function. ` npx knex migrate: rollback`
+
+            * When you run it, it's going to say `Batch 1 rollback: 1 migrations` 
+            
+            * We still have the produce.db3 file in your data folder. It did not delete the file. 
+            
+            * If you open that file in DB Browser, you'll see that the fruits table is no longer there. It deleted it. 
+
+            * Knex added 2 additional tables to the database. You'll see a `knex_migrations` and a `knex_migrations_lock` file in Tables. These are just used internally by Knex to keep track of which files have been executed so far and which haven't. 
+
+        * If we run `npx knex migration:latest` again, it will recreate that fruits table because we deleted it earlier (with the ifNotExists on it)
+
+        * You can roll back again in the terminal and it's deleted again. The recreate it again. It's that easy. Great when you need to make a small tweak to a column. 
