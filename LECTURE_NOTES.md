@@ -395,15 +395,15 @@ Before we get to our schema builder commands, let's get the Knex command line in
 
         3. Lastly, because of some underlying options using Knex and how they work with SQLite, we have to tell it to use null as default (above the connection). Set the default to true. That's just required in order for SQLite and Knex to work properly with `null` values. 
 
-        ```
-        module.exports = {
-            client: "sqlite3",
-            useNullAsDefault: true, // Flag REQUIRED for SQLite to work
-            connection: {
-                filename: "./data/produce.db3" // location of our db file
-            }
+    ```
+    module.exports = {
+        client: "sqlite3",
+        useNullAsDefault: true, // Flag REQUIRED for SQLite to work
+        connection: {
+            filename: "./data/produce.db3" // location of our db file
         }
-        ```
+    }
+    ```
 
 2. Now that we have our Knex configuration set up, we need to create an actual instance of Knex. We need an instance that's connected to the database that we can use to run SQL commands. It's really, really easy.
 
