@@ -60,26 +60,26 @@
     
     F. If our schema is messy, it's going to:
     
-    1. result in messy data, 
+    * result in messy data, 
     
-    2. then result in hard-to-find bugs, 
+    * then result in hard-to-find bugs, 
     
-    3. resulting into scaling issues,
+    * resulting into scaling issues,
 
-    4. then performance issues and a lot of other issues that can come from messy database schemas. 
+    * then performance issues and a lot of other issues that can come from messy database schemas. 
 
     G. It's really important for us to think through this whole structure before we actually start working with our database. We need to think about _how_ our database should be structured.
 
     H. When designing these database structures, there are 3 things we need to ask ourselves:
 
-    1. What fields or columns does a table need?
+    * What fields or columns does a table need?
         * What kind of data are we storing?
         
         * What is the shape of it?
         
         * What does it look like?
 
-    2. What type of data do we expect for each column? What are the specific types of the data? 
+    * What type of data do we expect for each column? What are the specific types of the data? 
         
         * Are we storing numbers?
         
@@ -89,7 +89,7 @@
         
         * Are we storing decimal numbers?
     
-    3. Are there any restrictions or constraints needed for each column?
+    * Are there any restrictions or constraints needed for each column?
         
         * Do the values have to constrain to some specific rule? 
         
@@ -389,11 +389,11 @@ Before we get to our schema builder commands, let's get the Knex command line in
 
     E. The first thing we're going to specify some things inside the exports module.
     
-    1. The CLIENT. The client is sqlite3.
+    * The CLIENT. The client is sqlite3.
 
-    2. A connection object. Here, we'll tell knex where our database file is. 
+    * A connection object. Here, we'll tell knex where our database file is. 
 
-    3. Lastly, because of some underlying options using Knex and how they work with SQLite, we have to tell it to use null as default (above the connection). Set the default to true. That's just required in order for SQLite and Knex to work properly with `null` values. 
+    * Lastly, because of some underlying options using Knex and how they work with SQLite, we have to tell it to use null as default (above the connection). Set the default to true. That's just required in order for SQLite and Knex to work properly with `null` values. 
 
     ```
     module.exports = {
