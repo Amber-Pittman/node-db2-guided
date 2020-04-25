@@ -512,6 +512,44 @@ Before we get to our schema builder commands, let's get the Knex command line in
 
         * In DB Browser, if you Browse Data, you'll see your fruits table with the strawberry inside it. 
 
-4. Now that we have the config set up, the instance of knex set up, let's get back to the DDL.
-// Stopping point
-// Video at 1:13:46
+4. Now that we have the config set up, the instance of knex set up, let's get back to the DDL. Our current way of creating the fruits table with DB Browser's Execute SQL button has some shortcomings. 
+
+* There is no version control. We can't see how our database got to the point it currently is at. SQL doesn't keep a history of any commands that we run, DDL or otherwise. 
+
+* The schema is not reversible. Since that's the case, this is where Database Migrations, also referred to as Schema Migrations, come into play.
+
+5. Schema (Database) Migrations are just code written to a file that describe the changes that need to happen over time. 
+
+A. Hypothetical Scenario
+
+* You have a migrations folder and a migrations1.js file in it. This file creates the fruits table. 
+
+* Later down the line you want to change something in your schema or your database, you will need to create a new migration file. The new file, migration2, will maybe add a new column to the fruits table and removes a default value from an existing column. It changes the schema in some way. 
+
+* Maybe a month later, you want to create a new table and change something in the fruits table. You'll create a new migrations3 file for your new vegetables table. In it, you delete the column for the fruits table. 
+
+B. We have these lists of files that incrementally build and change our database over time. This is what's referred to as a [schema migration](https://en.wikipedia.org/wiki/Schema_migration). 
+
+C. Migration libraries like Knex, will run through each one of the migrations files with the Migration command. It's going to incrementally build out the database schema. 
+
+* If we realize a change in the database is causing issues, like deleting a column from the fruits table may cause an issue in our application, we can easily reverse one of the migrations without messing with the earlier migrations. 
+
+D. Since we can incrementally build our schema and rollback migrations as needed, we can build this schema in a much more predictable way. 
+
+E. Think of migrations kind of like your bank statements. 
+
+* You log into your bank account and see that you have $100 in it. 
+
+* You probably want to figure out how your bank account got so low. 
+
+* You download your statements from the past year and look through each one of your transactions to see how it got down to where its at and what you spent all your money on. 
+
+* You have a history of changes that created a final result. A history of transactions that created a balance. 
+
+* It's the same idea with database migrations. Each migration file is like a bank statement. Inside each of those files, we make small changes to our schema, like the bank transactions. 
+
+    * If anyone wants to recreate our database on their local machines, they just have to run each migration file in the same order they were created and they're going to have a working copy of our schema exactly as it is currently. 
+
+    * We can create a bunch of these migration files over time, as our schema changes, and we now have a replicable and a reversible history of how the database schema got to where its at. 
+
+6. Implement Schema Migrations with Knex
