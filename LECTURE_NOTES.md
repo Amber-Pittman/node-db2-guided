@@ -575,7 +575,9 @@ Before we get to our schema builder commands, let's get the Knex command line in
 
     G. In the migrations file, we have 2 functions. Delete the semicolons. 
 
-    * We have an up function. In it, we essentially put our schema builder code that creates or changes our schema in some way. It moves our database 1 step forward. 
+    * Up Function
+    
+        *  In it, we essentially put our schema builder code that creates or changes our schema in some way. It moves our database 1 step forward. 
 
         * Let's recreate our fruits table using this migration with the up function. 
 
@@ -629,7 +631,7 @@ Before we get to our schema builder commands, let's get the Knex command line in
 
             * Open the new produce file in DB Browser and you'll see it's created the same schema as we did before in the migrations file. 
 
-    * We have a down function
+    * Down Function
         ```
         exports.down = function(knex) {}
         ```
