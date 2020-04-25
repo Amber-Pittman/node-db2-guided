@@ -389,11 +389,11 @@ Before we get to our schema builder commands, let's get the Knex command line in
 
     E. The first thing we're going to specify some things inside the exports module.
     
-        1. The CLIENT. The client is sqlite3.
+    1. The CLIENT. The client is sqlite3.
 
-        2. A connection object. Here, we'll tell knex where our database file is. 
+    2. A connection object. Here, we'll tell knex where our database file is. 
 
-        3. Lastly, because of some underlying options using Knex and how they work with SQLite, we have to tell it to use null as default (above the connection). Set the default to true. That's just required in order for SQLite and Knex to work properly with `null` values. 
+    3. Lastly, because of some underlying options using Knex and how they work with SQLite, we have to tell it to use null as default (above the connection). Set the default to true. That's just required in order for SQLite and Knex to work properly with `null` values. 
 
     ```
     module.exports = {
@@ -411,7 +411,9 @@ Before we get to our schema builder commands, let's get the Knex command line in
 
     B. Name the new file.
     
-    * `config.js || databaseConfig.js || dbConfig.js || instance.js || db.js`. Whatever you want to call it, just as long as it's clear that this is the Knex instance. 
+    * `config.js || databaseConfig.js || dbConfig.js || instance.js || db.js` 
+    
+    * Whatever you want to call it, just as long as it's clear that this is the Knex instance. 
 
     C. Import knex. 
 
