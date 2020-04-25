@@ -285,13 +285,67 @@
     );
     ```
 
+    H. Our database now has all the types and all the constraints!
 
+        * If you try running the command again without changing anything, you will get an error saying "fruits" already exists. 
+
+        * A way to check if the table exists is to include IF NOT EXISTS into the command. That way, if it does exist, it will just skip over that command. If it does not exist, it will create it.
+
+        ```
+        CREATE TABLE IF NOT EXISTS "fruits" (
+            "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            "name" TEXT NOT NULL UNIQUE,
+            "avgWeightOz" FLOAT NOT NULL,
+            "delicious" BOOLEAN NOT NULL DEFAULT true,
+            "color" TEXT
+        );
+        ```
+
+12. What if we wanted to add a column later down the road to this fruits table? This is where we use the ALTER TABLE command. 
+
+    A. In the DB Browser, create a new SQL tab inside the Execute SQL section. 
+
+    B. Update fruits to add a column of "tropical" with a boolean and a default of false.
+    ```
+    ALTER TABLE
+    ADD COLUMN "tropical" BOOLEAN DEFAULT false;
+    ```
         
+    C. Run the command then go checkout the Database Structure. You should now see your new tropical column with the datatype of Boolean and the schema has a default of false. 
 
+13. What if we wanted to delete a table? 
 
+    A. In the DB Browser, create a new SQL tab inside the Execute SQL section. 
 
+    B. Just DROP TABLE and pass the table name.
+    ```
+    DROP TABLE "fruits";
+    ```
 
+    C. Run the command then go checkout the Database Structure. The fruits db is no longer there. 
 
+    D. **_DO NOT RUN THIS COMMAND UNLESS YOU ARE 100% SURE YOU DON'T NEED IT!!!_** Database operations are not reversible most of the time. You have to be really careful with the commands that you run. 
+
+    * Going back to that idea of SQL Injection Attacks, if you were passing strings straight into your database from the frontend where the users could pass in anything they want up into the database, say goodbye to your database. 
+
+14. Head back over to the first command in the Execute SQL tab. Run it again so that we have a table to play with. 
+
+    * Since we have IF NOT EXISTS in our create table command, we should add IF EXISTS to Alter Table and Drop Table commands. That way, we won't get any errors if stuff doesn't exist when we're expecting it to. 
+
+    ```
+    CREATE TABLE IF NOT EXISTS "fruits" (
+        "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+        "name" TEXT NOT NULL UNIQUE,
+        "avgWeightOz" FLOAT NOT NULL,
+        "delicious" BOOLEAN NOT NULL DEFAULT true,
+        "color" TEXT
+    );
+
+    ALTER TABLE IF EXISTS
+    ADD COLUMN "tropical" BOOLEAN DEFAULT false;
+
+    DROP TABLE IF EXISTS "fruits";
+    ```
 
 
 
