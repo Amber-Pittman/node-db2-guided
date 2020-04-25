@@ -168,6 +168,7 @@
 8. Go into the Execute SQL tab.
     
     A. We want to insert a new row. Temporarily, leave out the average weight column.
+       
         ```
         INSERT INTO "fruits" ("name", "delicious", "color")
         VALUES ('strawberry', true, 'red');
@@ -176,10 +177,12 @@
     * Running that statement returns an error message of NOT NULL. 
     
     B. If this was hooked up to a frontend, we would want to return some sort of message explaining the error. "Missing x part of the form". The user can then add the average weight value. 
+
         ```
         INSERT INTO "fruits" ("name", "delicious", "color", "avgWeightOz")
         VALUES ('strawberry', true, 'red', 0.42);
         ```
+    
     * Once the required column was added in, the new row was inserted into the table. 
 
     C. These constraints along with the data types and columns are helping keep us organized and normalized (ideal).
@@ -193,6 +196,7 @@
 10. The **_Data Definition Language_**, the DDL, consists of 3 Main Commands for 3 different operations. We need to be able to create tables, update or alter tables, and we need to be able to delete or drop tables. 
   
     A. The Create Table Command
+
         ```
         CREATE TABLE <table name> (
             <column name> <column type> < column constraints>,
@@ -201,11 +205,13 @@
         ```
 
     B. The Alter Table Command
+    
         ```
         ALTER TABLE <table name> <stuff to change>;
         ```
 
     C. The Drop Table Command (Delete)
+    
         ```
         DROP TABLE <table name>;
         ```
@@ -216,7 +222,9 @@
     A. Click on Write Changes or Revert Changes before you close the Database.
 
     B. Go into your `data` folder. 
+    
     * Delete the produce.db3 file
+    
     * If you have a produce.db3-journal file, delete it as well.
 
     C. Open DB Browser again. 
@@ -228,6 +236,7 @@
     F. Close the `Edit table definition` popup because we're going to do this from scratch. You should be in a completely blank database now. If you look in your file system, you will see your new produce.db3 file.
 
     G. Go to Execute SQL tab. Let's create a new fruits table. 
+       
         ```
         CREATE TABLE "fruits" (
             // Create your Primary key and make it automatically increment when new ones
@@ -241,10 +250,11 @@
             
             "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 
-            // Datatype of name is text (or use VARCHAR and specify a length if you wanted 
-                // to use one that gets converted into text)
+            // Datatype of name is text (or use VARCHAR() and specify a length inside the 
+                // parens if you wanted to use one that gets converted into text)
             // Don't want it to be empty, so not null
-            // Name should be unique in this situation because we're talking about fruits, not people
+            // Name should be unique in this situation because we're talking about fruits,
+                // not people
 
             "name" TEXT NOT NULL UNIQUE,
 
@@ -267,6 +277,7 @@
         ```
 
     * Without all the comments inside the code, it should look like this:
+      
         ```
         CREATE TABLE "fruits" (
             "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -276,6 +287,8 @@
             "color" TEXT
         );
         ```
+
+
         
 
 
