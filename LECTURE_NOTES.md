@@ -351,11 +351,11 @@
 
 15. What would happen if you already had data and needed to change the schema? 
 
-* When we run the ALTER TABLE command, that's not doing anything to the data. The data just stays where it is. Instead, it changes the table around the data. 
+    * When we run the ALTER TABLE command, that's not doing anything to the data. The data just stays where it is. Instead, it changes the table around the data. 
 
-* Essentially, if we already had a list of 10 fruits in our database and ran ALTER TABLE to add the tropical column, the result would be that all 10 fruits would now have that column and their values would be false because of the default. 
+    * Essentially, if we already had a list of 10 fruits in our database and ran ALTER TABLE to add the tropical column, the result would be that all 10 fruits would now have that column and their values would be false because of the default. 
 
-* Our schema can change around our data but we're not messing _with_ our data.
+    * Our schema can change around our data but we're not messing _with_ our data.
 
 
 ### KnexJS
@@ -448,5 +448,70 @@ Before we get to our schema builder commands, let's get the Knex command line in
     ```
     const db = require("../data/config")
     ```
-    E. Since that is now connected to our database, we can call all of our queries.  
+    E. Since that is now connected to our database, we can call all of our queries. 
+    
+    F. Let's test things to make sure our database still works. 
 
+    * Start the server
+
+    * Go to Insomnia
+
+        * Make sure the Welcome request still runs
+
+        * Check the Get Fruit request
+
+            * We get a 500 status! Go to your terminal and see what the error was. 
+
+            * "No such table 'fruits'" 
+            
+            * We forgot to recreate our table after we ran the Drop Table command earlier. 
+
+                * In DB Browser, within the Execute SQL tab, run your Create Table command again. 
+
+                * Table is created now. 
+
+        * Try calling Get Fruits with Insomnia once again. 
+
+            * We get a successful response but it's empty
+
+            * We don't have any data in our database
+
+    G. **Important Side Note:** You may run into a specific error later. Let's try running that Alter Table again. Don't click write changes or revert changes, just kind of leave it as it is. 
+
+    * Try making a request to POST fruits in Insomnia. 
+
+        * Send a name - strawberry
+
+        * avgWeightOz - 0.42
+
+        * delicious - true
+
+        * color - red
+
+    * The result is a 500 internal error. 
+
+    * Look in your terminal. You will come across this error at some point. `SQLITE_BUSY: database is locked` It's a quick fix but let's talk about why it's occurring. 
+
+        * When we're messing around in our database with DB Browser - we're changing stuff, we're adding rows - it's essentially making changes to the produce.db3 file.
+
+        * Something that DB Browser does in order to prevent other processes from changing the database file while it's messing with it, it creates a lockfile. If you look in your data file, you will see a `-journal` file. That's DB Browser's lockfile. 
+
+        * DB Browser's lockfile is the reason why we're getting the "database is locked" error. 
+
+    * To release the lock - it's really easy - go back into DB Browser and click Write Changes or Revert Changes. 
+
+        * This tells DB Browser that we are done running our commands. Release the lock and allow other stuff to work this file.  
+
+    * After you click revert changes, select yes on the pop up. 
+
+        * It releases that lock.
+
+        * You can confirm by going into your data folder and see that the -journal file is no longer there. 
+
+        * Now we're allowed to actually work with the database from Node. We can call the post endpoint and create the new fruit. It creates it and returns it. We're good to go! :) 
+
+        * In DB Browser, if you Browse Data, you'll see your fruits table with the strawberry inside it. 
+
+4. Now that we have the config set up, the instance of knex set up, let's get back to the DDL.
+// Stopping point
+// Video at 1:13:46
