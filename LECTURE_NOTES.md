@@ -170,8 +170,10 @@
     A. We want to insert a new row. Temporarily, leave out the average weight column.
        
         ```
-            INSERT INTO "fruits" ("name", "delicious", "color")
-            VALUES ('strawberry', true, 'red');
+
+        INSERT INTO "fruits" ("name", "delicious", "color")
+        VALUES ('strawberry', true, 'red');
+
         ```
 
     * Running that statement returns an error message of NOT NULL. 
@@ -179,8 +181,10 @@
     B. If this was hooked up to a frontend, we would want to return some sort of message explaining the error. "Missing x part of the form". The user can then add the average weight value. 
 
         ```
-            INSERT INTO "fruits" ("name", "delicious", "color", "avgWeightOz")
-            VALUES ('strawberry', true, 'red', 0.42);
+
+        INSERT INTO "fruits" ("name", "delicious", "color", "avgWeightOz")
+        VALUES ('strawberry', true, 'red', 0.42);
+        
         ```
     
     * Once the required column was added in, the new row was inserted into the table. 
@@ -196,24 +200,27 @@
 10. The **_Data Definition Language_**, the DDL, consists of 3 Main Commands for 3 different operations. We need to be able to create tables, update or alter tables, and we need to be able to delete or drop tables. 
   
     A. The Create Table Command
-
         ```
-            CREATE TABLE <table name> (
-                <column name> <column type> < column constraints>,
-                <column name> <column type> < column constraints>
-            );
+
+        CREATE TABLE <table name> (
+            <column name> <column type> < column constraints>,
+            <column name> <column type> < column constraints>
+        );
+        
         ```
 
     B. The Alter Table Command
-    
         ```
-            ALTER TABLE <table name> <stuff to change>;
+
+        ALTER TABLE <table name> <stuff to change>;
+        
         ```
 
     C. The Drop Table Command (Delete)
-    
         ```
+    
             DROP TABLE <table name>;
+    
         ```
 
 
@@ -238,54 +245,58 @@
     G. Go to Execute SQL tab. Let's create a new fruits table. 
        
         ```
-            CREATE TABLE "fruits" (
-                // Create your Primary key and make it automatically increment when new ones
-                    // are added
-                // It needs to be marked as the primary key as unique and needs to have NOT NULL
-                    //(we don't want our IDs to be null/empty)
-                // When specifying constraints, you do not need commas or any sort of boundary
-                    // creators like []
-                // Mark it as the Primary Key. Since Primary Key is marked as such, there's no 
-                    // reason to use the UNIQUE identifier. 
-                
-                "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 
-                // Datatype of name is text (or use VARCHAR() and specify a length inside the 
-                    // parens if you wanted to use one that gets converted into text)
-                // Don't want it to be empty, so not null
-                // Name should be unique in this situation because we're talking about fruits,
-                    // not people
+        CREATE TABLE "fruits" (
+            // Create your Primary key and make it automatically increment when new ones
+                // are added
+            // It needs to be marked as the primary key as unique and needs to have NOT NULL
+                //(we don't want our IDs to be null/empty)
+            // When specifying constraints, you do not need commas or any sort of boundary
+                // creators like []
+            // Mark it as the Primary Key. Since Primary Key is marked as such, there's no 
+                // reason to use the UNIQUE identifier. 
+            
+            "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 
-                "name" TEXT NOT NULL UNIQUE,
+            // Datatype of name is text (or use VARCHAR() and specify a length inside the 
+                // parens if you wanted to use one that gets converted into text)
+            // Don't want it to be empty, so not null
+            // Name should be unique in this situation because we're talking about fruits,
+                // not people
 
-                // Need a number type, so use FLOAT or REAL here
-                // Constraints: Can't be empty
+            "name" TEXT NOT NULL UNIQUE,
 
-                "avgWeightOz" FLOAT NOT NULL,
+            // Need a number type, so use FLOAT or REAL here
+            // Constraints: Can't be empty
 
-                // Is it delicious? Use a boolean
-                // Can't be empty
-                // Default the deliciousness to true
+            "avgWeightOz" FLOAT NOT NULL,
 
-                "delicious" BOOLEAN NOT NULL DEFAULT true,
+            // Is it delicious? Use a boolean
+            // Can't be empty
+            // Default the deliciousness to true
 
-                // Color is a text type
-                // Doesn't need any constraints. Can be left empty. 
+            "delicious" BOOLEAN NOT NULL DEFAULT true,
 
-                "color" TEXT
-            );
+            // Color is a text type
+            // Doesn't need any constraints. Can be left empty. 
+
+            "color" TEXT
+        );
+
         ```
 
     * Without all the comments inside the code, it should look like this:
       
         ```
-            CREATE TABLE "fruits" (
-                "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                "name" TEXT NOT NULL UNIQUE,
-                "avgWeightOz" FLOAT NOT NULL,
-                "delicious" BOOLEAN NOT NULL DEFAULT true,
-                "color" TEXT
-            );
+        
+        CREATE TABLE "fruits" (
+            "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            "name" TEXT NOT NULL UNIQUE,
+            "avgWeightOz" FLOAT NOT NULL,
+            "delicious" BOOLEAN NOT NULL DEFAULT true,
+            "color" TEXT
+        );
+
         ```
 
 
