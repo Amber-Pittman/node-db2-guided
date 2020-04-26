@@ -759,7 +759,7 @@ Before we get to our schema builder commands, let's get the Knex command line in
 
     * **_SIDE NOTE:_** To clarify, when we run migrate latest, that runs all of the migrations that haven't been run yet. When they get run, those make up a Batch. If we create a new migration afterwards, that kind of working in a new batch. It's all time based. It's based on when they were run and when they were created. 
 
-    * Scenario: Let's say we run these migrations against a live database where it's storing real user data. After a few hours, we realize a mistake was made and we need to make another change to our schema. We misspelled the column name. Should we rollback the last migration and change it then migrate again? Or should we create a brand new migration file with the change? Considering the fact that we've deployed this; it's live gathering real user data. 
+    * **Scenario:** Let's say we run these migrations against a live database where it's storing real user data. After a few hours, we realize a mistake was made and we need to make another change to our schema. We misspelled the column name. Should we rollback the last migration and change it then migrate again? Or should we create a brand new migration file with the change? Considering the fact that we've deployed this; it's live gathering real user data. 
         
         * **Answer:** We should _always_ create a new migration. We should never run a new migrate rollback on a _live_ production base, unless it's an absolute emergency. 
 
@@ -782,3 +782,69 @@ Before we get to our schema builder commands, let's get the Knex command line in
     * If for some reason you wanted to rollback all the way down to the first migration, you could do `migrate:down [0]`. But it's easier to just delete the database file and restart from scratch. 
 
 9. Now that we know how to run our migrations and roll back our database schema, run a `npx knex migrate:latest`. The schema is updated and ready to go but if you look in the fruits table, it's empty. It doesn't have any fruits yet. 
+
+    * If we start our server in the terminal, `npm run server` and make a get request to fruits in Insomnia, it's going to return an empty array. It's not very useful for testing. 
+
+        * We should probably put some data in there
+
+    * In order to populate some sample data, we use seeds - case seeding. Seeds are just code that just connects to the database and tests data. That's it. 
+
+    * To create some seeds with knex, go into our terminal again and create some fruit seeds. `npx knex seed:make fruits`. Once you run that, you will see that there's a seeds folder that was created. It houses our new fruits seed file. 
+
+    * Inside of the function, we can literally call our query builder commands to insert some test data. We just call the knex('table_name').insert() or knex('table_name').del() or .truncate() to delete the table to start fresh. 
+
+    * Get rid of everything inside this seed function. We're going to start this from scratch.
+
+        * Make it an async/await function. 
+
+        * Clear out all the data of the fruits table. 
+          * Everything that might potentially be in there. We want to start from a predictable test data set. We just want to find 5 or 6 rows in there. If we had been calling the post endpoint and adding fruits of our own, we want to clear all those out before we seed our table. We can start from the same point every single time. 
+
+        * What can we call to clear out our table? Use `.del()` without a where() statement. 
+
+        * Reset the auto-incrementing ID. So instead of `.del()`, we can call `.truncate()`. That is going to 
+            
+            * Clear out our rows
+
+            * It does more than `.del()`, like resetting the auto-incrementing ID
+
+        * Call insert and insert some test data. 
+            
+            * We can pass in more than one row at a time by passing in an array.
+
+        * Go back to your command line. `npx knex seed:run`
+
+            * This command clears out your database, resetting everything.
+
+            * It also populates it with some fresh test data that you expect.
+
+            * `Ran 1 seed files`
+
+        * In DB Browser, it is now populated with some data in the Browse Data tab. 
+
+        * Make a post request to create a new fruit row. You should get a 201. 
+
+        * Refresh DBB. You should see your new strawberry row. 
+
+        * To reset it back to it's original state and remove the new row, just do seed:run in the terminal again. 
+
+        * Seeds are kind of like initial state with react. This is for testing purposes though. You never want to deploy this with your seed data because the seed data is really meant for local development and testing. It's not meant for your live users to interact with. 
+
+
+        * Final version of the seed file:
+
+            ```
+            exports.seed = async function(knex) {
+                await knex("fruits").truncate()
+
+                away knex("fruits").insert([
+                    { name: "dragon fruit", avgWeightOz: 16.7, delicious: true, color: "red" },
+                    { name: "durian", avgWeightOz: 52.9, delicious: false, color: "yellow" },
+                    { name: "rambutan", avgWeightOz: 1.1, delicious: true, color: "pink" },
+                    { name: "lingonberry", avgWeightOz: 0.01, delicious: true, color: "red" },
+                    { name: "golden gooseberry", avgWeightOz: 0.02, delicious: true, color: "yellow" },
+                ])
+            }
+            ```
+
+### Done!
