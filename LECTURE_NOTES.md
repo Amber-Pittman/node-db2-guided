@@ -649,7 +649,7 @@ Before we get to our schema builder commands, let's get the Knex command line in
         }
         ```
 
-        * In the terminal, we can run the down function. ` npx knex migrate: rollback`
+        * In the terminal, we can run the down function. `npx knex migrate:rollback`
 
             * When you run it, it's going to say `Batch 1 rollback: 1 migrations` 
             
@@ -662,3 +662,123 @@ Before we get to our schema builder commands, let's get the Knex command line in
         * If we run `npx knex migration:latest` again, it will recreate that fruits table because we deleted it earlier (with the ifNotExists on it)
 
         * You can roll back again in the terminal and it's deleted again. The recreate it again. It's that easy. Great when you need to make a small tweak to a column. 
+
+7. What do we need to do if we need to update the table? Maybe we need a new column for the fruits table. We need to be able to track the color now.  How do we do that?
+
+    * Create a new migrations file and give it the name of fruit color. 
+    `npx knex migrate:make fruit_color`
+
+    * It creates the new file with the new timestamp - YearMonthDayHHMMSS_fruit_color.js
+
+    * Remember, the timestamp is to make sure that the database is ran in the right order of being built or changed.
+
+    * Let's add the color column into the fruits table. 
+
+        * Go into the new migrations file. Get rid of the unnecessary semicolons. 
+
+        * Make them both async functions. 
+
+        * What we do to alter the data is to use await when calling knex on the schema and use the alterTable syntax. 
+        
+        * We're going to have the same callback of the table parameter. 
+        
+        * Then to insert the column, we do as before: table.text("color"). 
+        
+        * We don't need any constraints, so we can let it be null and there's no default value so we can leave it as it is.
+
+        ```
+        exports.up = async function(knex) {
+            await knex.schema.alterTable("fruit", (table) => {
+                table.text("color")
+            })
+        }
+
+        exports.down = async function(knex) {
+            /// await something
+        }
+        ```
+    * To revert this change, what do we need to do to the down function? If you look in [Knex's Schema Builder Documentation](https://knexjs.org/#Schema-dropColumn), you will see a dropTable command. 
+
+        * Specify the fruit table.
+
+        * The callback takes table.
+
+        * According to the documentation, we can call dropColumn. 
+
+        * Specify color.
+
+        * The down function looks very similar to the up function. It's just calling dropColumn instead of providing a name for the column with text.
+
+        ```
+        exports.up = async function(knex) {
+            await knex.schema.alterTable("fruit", (table) => {
+                table.text("color")
+            })
+        }
+
+        exports.down = async function(knex) {
+            await knex.schema.alterTable("fruit", (table) => {
+                table.dropColumn("color")
+            })
+        }
+        ```
+
+    * If you go to your and run your migrate latest command again, it's going to say `Batch 2 run: 1 migrations`
+
+        * Go look at your schema in DB Browser. It kept the original fruit schema but added the color column. It incrementally built off the last migration. 
+
+    * Try rolling back now. `npx knex migrate:rollback`
+
+        * When you run it, it's going to say `Batch 2 rolled back: 1 migrations` 
+
+            * When you go and look at the database in DB Browser, it didn't delete the fruits table. 
+            
+            * It deleted the color column as expected. 
+            
+            * The reason behind is, knex migrations work in batches. When you run the rollback command in your terminal, it will show you which batch ran (Batch 1 or Batch 2, etc). 
+            
+                * When you run the migration:latest command, knex is going to take _all_ the migration files that haven't been run yet and it's going to run them all in one singular batch. 
+
+                * When you run rollback, knex is going to rollback the entire last batch of migrations; whether it was 1 migration file or several migration files, rollback reverts to the previous version. 
+    
+8. Migrations
+
+    * Since we created the fruits table since the first time we migrated, we created the color column the 2nd time we migrated, that was 2 separate batches. 
+        
+        * If we run rollback the first time, it rolls back the 2nd batch. 
+
+        * If we were to run rollback again, that's going to rollback the first batch. Doing this will delete our fruits table. 
+
+        * If you try to rollback _again_, it's going to tell you that you're already at the base migration and there's nothing left to rollback. 
+
+        * Now, if you migrate latest, the terminal returns `Batch 1 run: 2 migrations`. It took all the migrations that haven't been run yet (because we rolled everything back) and ran them in 1 batch. 
+
+            * This means that we created the table and added the column in a single run. 
+
+        * If we rolled back again, it would rollback both migrations and there would be nothing in the database. 
+
+    * **_SIDE NOTE:_** To clarify, when we run migrate latest, that runs all of the migrations that haven't been run yet. When they get run, those make up a Batch. If we create a new migration afterwards, that kind of working in a new batch. It's all time based. It's based on when they were run and when they were created. 
+
+    * Scenario: Let's say we run these migrations against a live database where it's storing real user data. After a few hours, we realize a mistake was made and we need to make another change to our schema. We misspelled the column name. Should we rollback the last migration and change it then migrate again? Or should we create a brand new migration file with the change? Considering the fact that we've deployed this; it's live gathering real user data. 
+        
+        * **Answer:** We should _always_ create a new migration. We should never run a new migrate rollback on a _live_ production base, unless it's an absolute emergency. 
+
+            * The reason is rollbacks can lose data. Let's say that our users updated that database and added color values after that migration. Then we rolled that migration back and we dropped the color column. But there's already data in there. We're going to lose that data. 
+
+    * These migrations (moving forward and rolling back) are really useful for local development, for changing your schema locally when you're building it out, but once it's live and collecting real user data, you never want to roll it back. Unless it is an emergency. 
+
+    * If we had _n_ numbers of migrations and we rolled back to the base migration but then wanted to go to a specific migration number, how do you do that?
+
+        * In the terminal, `npx knex migrate --help`
+
+        * In the commands section, you will see `migrate:up [<name>]`. You can specify the specific migration. 
+
+        * You could also use `migrate:down [<name>]` too to rollback, not the `migrate:rollback [options]` command. 
+
+        * However, **_don't_** rollback a specific migration unless you absolutely have to. Otherwise, it will just confuse you even more. 
+
+    * How will you remember if you rollback your schema? Because you have code written in your down function. Whatever code you have written in the down function is what will be run. If you already ran this migration in a live database, you know you have some data in the color column, you're not going to want to roll it back because data will be deleted. 
+
+    * If for some reason you wanted to rollback all the way down to the first migration, you could do `migrate:down [0]`. But it's easier to just delete the database file and restart from scratch. 
+
+9. Now that we know how to run our migrations and roll back our database schema, run a `npx knex migrate:latest`. The schema is updated and ready to go but if you look in the fruits table, it's empty. It doesn't have any fruits yet. 
