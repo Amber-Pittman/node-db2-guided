@@ -5,5 +5,5 @@ module.exports = {
   useNullAsDefault: true,
   connection: {
     filename: "./data/produce.db3"
-  }
+  },
 };
