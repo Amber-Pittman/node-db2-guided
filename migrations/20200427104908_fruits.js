@@ -1,4 +1,3 @@
-
 exports.up = async function(knex) {
   await knex.schema.createTable("fruits", () => {
       table.increments("id")
@@ -9,5 +8,5 @@ exports.up = async function(knex) {
 };
 
 exports.down = async function(knex) {
-  
+  await knex.schema.createTable("fruits")
 };
