@@ -627,7 +627,7 @@ Before we get to our schema builder commands, let's get the Knex command line in
             
             * Make sure your produce files aren't there anymore before you do the next step.
             
-            *  Go to the terminal. `npx knex migration:latest`
+            *  Go to the terminal. `npx knex migrate:latest`
 
                 * When you run it, it's going to say `Batch 1 run: migrations` and its going to create a produce.db3 file in your data folder. 
 
@@ -659,7 +659,7 @@ Before we get to our schema builder commands, let's get the Knex command line in
 
             * Knex added 2 additional tables to the database. You'll see a `knex_migrations` and a `knex_migrations_lock` file in Tables. These are just used internally by Knex to keep track of which files have been executed so far and which haven't. 
 
-        * If we run `npx knex migration:latest` again, it will recreate that fruits table because we deleted it earlier (with the ifNotExists on it)
+        * If we run `npx knex migrate:latest` again, it will recreate that fruits table because we deleted it earlier (with the ifNotExists on it)
 
         * You can roll back again in the terminal and it's deleted again. The recreate it again. It's that easy. Great when you need to make a small tweak to a column. 
 
@@ -711,13 +711,13 @@ Before we get to our schema builder commands, let's get the Knex command line in
 
         ```
         exports.up = async function(knex) {
-            await knex.schema.alterTable("fruit", (table) => {
+            await knex.schema.alterTable("fruits", (table) => {
                 table.text("color")
             })
         }
 
         exports.down = async function(knex) {
-            await knex.schema.alterTable("fruit", (table) => {
+            await knex.schema.alterTable("fruits", (table) => {
                 table.dropColumn("color")
             })
         }
