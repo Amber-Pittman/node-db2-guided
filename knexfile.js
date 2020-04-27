@@ -2,8 +2,8 @@
 
 module.exports = {
   client: "sqlite3",
-  useNullAsDefault: true, // Flag REQUIRED for SQLite to work
+  useNullAsDefault: true,
   connection: {
-      filename: "./data/produce.db3" // location of our db file
+    filename: "./data/produce.db3"
   },
-}
+};

@@ -1,4 +1,6 @@
-# Notes
+# DATABASE SCHEMA DESIGN
+
+## Notes
 
 1. What type of Database have we been working with up to now? 
 
@@ -29,7 +31,7 @@
 9. MySQL and Postgres are better suited for real-world applications of backend data. But SQLite will help build up your skills. 
 
 
-# Code Along
+## Code Along
 
 ### SQL
 
@@ -351,11 +353,11 @@
 
 15. What would happen if you already had data and needed to change the schema? 
 
-* When we run the ALTER TABLE command, that's not doing anything to the data. The data just stays where it is. Instead, it changes the table around the data. 
+    * When we run the ALTER TABLE command, that's not doing anything to the data. The data just stays where it is. Instead, it changes the table around the data. 
 
-* Essentially, if we already had a list of 10 fruits in our database and ran ALTER TABLE to add the tropical column, the result would be that all 10 fruits would now have that column and their values would be false because of the default. 
+    * Essentially, if we already had a list of 10 fruits in our database and ran ALTER TABLE to add the tropical column, the result would be that all 10 fruits would now have that column and their values would be false because of the default. 
 
-* Our schema can change around our data but we're not messing _with_ our data.
+    * Our schema can change around our data but we're not messing _with_ our data.
 
 
 ### KnexJS
@@ -448,5 +450,401 @@ Before we get to our schema builder commands, let's get the Knex command line in
     ```
     const db = require("../data/config")
     ```
-    E. Since that is now connected to our database, we can call all of our queries.  
+    E. Since that is now connected to our database, we can call all of our queries. 
+    
+    F. Let's test things to make sure our database still works. 
 
+    * Start the server
+
+    * Go to Insomnia
+
+        * Make sure the Welcome request still runs
+
+        * Check the Get Fruit request
+
+            * We get a 500 status! Go to your terminal and see what the error was. 
+
+            * "No such table 'fruits'" 
+            
+            * We forgot to recreate our table after we ran the Drop Table command earlier. 
+
+                * In DB Browser, within the Execute SQL tab, run your Create Table command again. 
+
+                * Table is created now. 
+
+        * Try calling Get Fruits with Insomnia once again. 
+
+            * We get a successful response but it's empty
+
+            * We don't have any data in our database
+
+    G. **Important Side Note:** You may run into a specific error later. Let's try running that Alter Table again. Don't click write changes or revert changes, just kind of leave it as it is. 
+
+    * Try making a request to POST fruits in Insomnia. 
+
+        * Send a name - strawberry
+
+        * avgWeightOz - 0.42
+
+        * delicious - true
+
+        * color - red
+
+    * The result is a 500 internal error. 
+
+    * Look in your terminal. You will come across this error at some point. `SQLITE_BUSY: database is locked` It's a quick fix but let's talk about why it's occurring. 
+
+        * When we're messing around in our database with DB Browser - we're changing stuff, we're adding rows - it's essentially making changes to the produce.db3 file.
+
+        * Something that DB Browser does in order to prevent other processes from changing the database file while it's messing with it, it creates a lockfile. If you look in your data file, you will see a `-journal` file. That's DB Browser's lockfile. 
+
+        * DB Browser's lockfile is the reason why we're getting the "database is locked" error. 
+
+    * To release the lock - it's really easy - go back into DB Browser and click Write Changes or Revert Changes. 
+
+        * This tells DB Browser that we are done running our commands. Release the lock and allow other stuff to work this file.  
+
+    * After you click revert changes, select yes on the pop up. 
+
+        * It releases that lock.
+
+        * You can confirm by going into your data folder and see that the -journal file is no longer there. 
+
+        * Now we're allowed to actually work with the database from Node. We can call the post endpoint and create the new fruit. It creates it and returns it. We're good to go! :) 
+
+        * In DB Browser, if you Browse Data, you'll see your fruits table with the strawberry inside it. 
+
+4. Now that we have the config set up, the instance of knex set up, let's get back to the DDL. Our current way of creating the fruits table with DB Browser's Execute SQL button has some shortcomings. 
+
+* There is no version control. We can't see how our database got to the point it currently is at. SQL doesn't keep a history of any commands that we run, DDL or otherwise. 
+
+* The schema is not reversible. Since that's the case, this is where Database Migrations, also referred to as Schema Migrations, come into play.
+
+5. Schema (Database) Migrations are just code written to a file that describe the changes that need to happen over time. 
+
+    A. Hypothetical Scenario
+
+    * You have a migrations folder and a migrations1.js file in it. This file creates the fruits table. 
+
+    * Later down the line you want to change something in your schema or your database, you will need to create a new migration file. The new file, migration2, will maybe add a new column to the fruits table and removes a default value from an existing column. It changes the schema in some way. 
+
+    * Maybe a month later, you want to create a new table and change something in the fruits table. You'll create a new migrations3 file for your new vegetables table. In it, you delete the column for the fruits table. 
+
+    B. We have these lists of files that incrementally build and change our database over time. This is what's referred to as a [schema migration](https://en.wikipedia.org/wiki/Schema_migration). 
+
+    C. Migration libraries like Knex, will run through each one of the migrations files with the Migration command. It's going to incrementally build out the database schema. 
+
+    * If we realize a change in the database is causing issues, like deleting a column from the fruits table may cause an issue in our application, we can easily reverse one of the migrations without messing with the earlier migrations. 
+
+    D. Since we can incrementally build our schema and rollback migrations as needed, we can build this schema in a much more predictable way. 
+
+    E. Think of migrations kind of like your bank statements. 
+
+    * You log into your bank account and see that you have $100 in it. 
+
+    * You probably want to figure out how your bank account got so low. 
+
+    * You download your statements from the past year and look through each one of your transactions to see how it got down to where its at and what you spent all your money on. 
+
+    * You have a history of changes that created a final result. A history of transactions that created a balance. 
+
+    * It's the same idea with database migrations. Each migration file is like a bank statement. Inside each of those files, we make small changes to our schema, like the bank transactions. 
+
+        * If anyone wants to recreate our database on their local machines, they just have to run each migration file in the same order they were created and they're going to have a working copy of our schema exactly as it is currently. 
+
+        * We can create a bunch of these migration files over time, as our schema changes, and we now have a replicable and a reversible history of how the database schema got to where its at. 
+
+6. Implement Schema Migrations with Knex
+
+    A. Knex is a migration library that we can use to implement this concept. 
+
+    B. You'll need to disconnect from DB Browser by clicking on the Close Database button. Doing so releases the lockfile from your file system.  
+
+    C. Delete that produce.db3 file again.
+
+    D. Create a new migration file in the terminal and name the table fruits.
+        ```
+        npx knex migrate:make fruits
+        ```
+
+    E. Look in your code. You will see an autopopulated migrations folder. It houses the migrations file you just created. 
+
+    F. The file name is quite long. It's a timestamped file while still being named fruits. 
+
+    * YearMonthDayHHMMSS_fruits.js
+
+    * It's important that the timestamp is in the name for the order of migrations. They have to run in the order they were created. 
+
+    G. In the migrations file, we have 2 functions. Delete the semicolons. 
+
+    * Up Function
+    
+        *  In it, we essentially put our schema builder code that creates or changes our schema in some way. It moves our database 1 step forward. 
+
+        * Let's recreate our fruits table using this migration with the up function. 
+
+            * Remember, just like knex helps us with our query building, it helps us with our schema building as well (DDL functions). 
+
+            * We have this instance of knex. It gives us this this instance of knex that just comes from the knex CLI (when we used the npx command earlier, we accessed the CLI). It came pre-configured and connected to database. We can use that to call knex in certain functions. 
+
+            * Behind the scenes, Knex is going to construct a CREATE TABLE SQL statement and send that through to the database. It's going to create that table of fruits. 
+
+            ```
+            exports.up = function(knex) {
+                knex.schema.createTable("fruits")
+            }
+            ```
+
+            * This function returns a promise. You need to make it async/await. 
+
+            ```
+            exports.up = async function(knex) {
+                await knex.schema.createTable("fruits")
+            }
+            ```
+
+            * The first parameter is the table name ("fruits"). The 2nd parameter is going to be a callback. The callback function is going to give us access to parameter, a variable, called "table." That table variable we can use to actually create our columns. 
+
+            ```
+            exports.up = async function(knex) {
+                await knex.schema.createTable("fruits", () => {
+                    // table.integer("id").notNull().primary() - creates ID column
+
+                    // Can shorten previous code to increments. 
+                        // Creates an autoincrementing column with all of those values
+                    table.increments("id") 
+
+                    table.text("name").notNull().unique()
+
+                    table.float("avgWeightOz").notNull()
+
+                    table.boolean("delicious").notNull().default(true)
+
+                    // We're intentionally leaving out the color for later.
+                })
+            }
+            ```
+            
+            * Make sure your produce files aren't there anymore before you do the next step.
+            
+            *  Go to the terminal. `npx knex migrate:latest`
+
+                * When you run it, it's going to say `Batch 1 run: migrations` and its going to create a produce.db3 file in your data folder. 
+
+            * Open the new produce file in DB Browser and you'll see it's created the same schema as we did before in the migrations file. 
+
+    * Down Function
+
+        * Remember, our schema migrations should _always_ be reversible. 
+
+        * In the event that we have to rollback a migration due to a bug or an error, we should be able to rollback any particular changes we made in this migration file.
+
+        * Our down function should _always_ reverse whatever happens in our up function. It's like moving back 1 step in time; making it like the migration never ran at all. We just want to drop the table. 
+
+        * Mark the down function as an async function. Then add await when calling knex for the schema to drop the table if "fruits" exists. 
+
+        ```
+        exports.down = async function(knex) {
+            await.knex.schema.dropTableIfExists("fruits")
+        }
+        ```
+
+        * In the terminal, we can run the down function. `npx knex migrate:rollback`
+
+            * When you run it, it's going to say `Batch 1 rollback: 1 migrations` 
+            
+            * We still have the produce.db3 file in your data folder. It did not delete the file. 
+            
+            * If you open that file in DB Browser, you'll see that the fruits table is no longer there. It deleted it. 
+
+            * Knex added 2 additional tables to the database. You'll see a `knex_migrations` and a `knex_migrations_lock` file in Tables. These are just used internally by Knex to keep track of which files have been executed so far and which haven't. 
+
+        * If we run `npx knex migrate:latest` again, it will recreate that fruits table because we deleted it earlier (with the ifNotExists on it)
+
+        * You can roll back again in the terminal and it's deleted again. The recreate it again. It's that easy. Great when you need to make a small tweak to a column. 
+
+7. What do we need to do if we need to update the table? Maybe we need a new column for the fruits table. We need to be able to track the color now.  How do we do that?
+
+    * Create a new migrations file and give it the name of fruit color. 
+    `npx knex migrate:make fruit_color`
+
+    * It creates the new file with the new timestamp - YearMonthDayHHMMSS_fruit_color.js
+
+    * Remember, the timestamp is to make sure that the database is ran in the right order of being built or changed.
+
+    * Let's add the color column into the fruits table. 
+
+        * Go into the new migrations file. Get rid of the unnecessary semicolons. 
+
+        * Make them both async functions. 
+
+        * What we do to alter the data is to use await when calling knex on the schema and use the alterTable syntax. 
+        
+        * We're going to have the same callback of the table parameter. 
+        
+        * Then to insert the column, we do as before: table.text("color"). 
+        
+        * We don't need any constraints, so we can let it be null and there's no default value so we can leave it as it is.
+
+        ```
+        exports.up = async function(knex) {
+            await knex.schema.alterTable("fruit", (table) => {
+                table.text("color")
+            })
+        }
+
+        exports.down = async function(knex) {
+            /// await something
+        }
+        ```
+    * To revert this change, what do we need to do to the down function? If you look in [Knex's Schema Builder Documentation](https://knexjs.org/#Schema-dropColumn), you will see a dropTable command. 
+
+        * Specify the fruit table.
+
+        * The callback takes table.
+
+        * According to the documentation, we can call dropColumn. 
+
+        * Specify color.
+
+        * The down function looks very similar to the up function. It's just calling dropColumn instead of providing a name for the column with text.
+
+        ```
+        exports.up = async function(knex) {
+            await knex.schema.alterTable("fruits", (table) => {
+                table.text("color")
+            })
+        }
+
+        exports.down = async function(knex) {
+            await knex.schema.alterTable("fruits", (table) => {
+                table.dropColumn("color")
+            })
+        }
+        ```
+
+    * If you go to your and run your migrate latest command again, it's going to say `Batch 2 run: 1 migrations`
+
+        * Go look at your schema in DB Browser. It kept the original fruit schema but added the color column. It incrementally built off the last migration. 
+
+    * Try rolling back now. `npx knex migrate:rollback`
+
+        * When you run it, it's going to say `Batch 2 rolled back: 1 migrations` 
+
+            * When you go and look at the database in DB Browser, it didn't delete the fruits table. 
+            
+            * It deleted the color column as expected. 
+            
+            * The reason behind is, knex migrations work in batches. When you run the rollback command in your terminal, it will show you which batch ran (Batch 1 or Batch 2, etc). 
+            
+                * When you run the migration:latest command, knex is going to take _all_ the migration files that haven't been run yet and it's going to run them all in one singular batch. 
+
+                * When you run rollback, knex is going to rollback the entire last batch of migrations; whether it was 1 migration file or several migration files, rollback reverts to the previous version. 
+    
+8. Migrations
+
+    * Since we created the fruits table since the first time we migrated, we created the color column the 2nd time we migrated, that was 2 separate batches. 
+        
+        * If we run rollback the first time, it rolls back the 2nd batch. 
+
+        * If we were to run rollback again, that's going to rollback the first batch. Doing this will delete our fruits table. 
+
+        * If you try to rollback _again_, it's going to tell you that you're already at the base migration and there's nothing left to rollback. 
+
+        * Now, if you migrate latest, the terminal returns `Batch 1 run: 2 migrations`. It took all the migrations that haven't been run yet (because we rolled everything back) and ran them in 1 batch. 
+
+            * This means that we created the table and added the column in a single run. 
+
+        * If we rolled back again, it would rollback both migrations and there would be nothing in the database. 
+
+    * **_SIDE NOTE:_** To clarify, when we run migrate latest, that runs all of the migrations that haven't been run yet. When they get run, those make up a Batch. If we create a new migration afterwards, that kind of working in a new batch. It's all time based. It's based on when they were run and when they were created. 
+
+    * **Scenario:** Let's say we run these migrations against a live database where it's storing real user data. After a few hours, we realize a mistake was made and we need to make another change to our schema. We misspelled the column name. Should we rollback the last migration and change it then migrate again? Or should we create a brand new migration file with the change? Considering the fact that we've deployed this; it's live gathering real user data. 
+        
+        * **Answer:** We should _always_ create a new migration. We should never run a new migrate rollback on a _live_ production base, unless it's an absolute emergency. 
+
+            * The reason is rollbacks can lose data. Let's say that our users updated that database and added color values after that migration. Then we rolled that migration back and we dropped the color column. But there's already data in there. We're going to lose that data. 
+
+    * These migrations (moving forward and rolling back) are really useful for local development, for changing your schema locally when you're building it out, but once it's live and collecting real user data, you never want to roll it back. Unless it is an emergency. 
+
+    * If we had _n_ numbers of migrations and we rolled back to the base migration but then wanted to go to a specific migration number, how do you do that?
+
+        * In the terminal, `npx knex migrate --help`
+
+        * In the commands section, you will see `migrate:up [<name>]`. You can specify the specific migration. 
+
+        * You could also use `migrate:down [<name>]` too to rollback, not the `migrate:rollback [options]` command. 
+
+        * However, **_don't_** rollback a specific migration unless you absolutely have to. Otherwise, it will just confuse you even more. 
+
+    * How will you remember if you rollback your schema? Because you have code written in your down function. Whatever code you have written in the down function is what will be run. If you already ran this migration in a live database, you know you have some data in the color column, you're not going to want to roll it back because data will be deleted. 
+
+    * If for some reason you wanted to rollback all the way down to the first migration, you could do `migrate:down [0]`. But it's easier to just delete the database file and restart from scratch. 
+
+9. Now that we know how to run our migrations and roll back our database schema, run a `npx knex migrate:latest`. The schema is updated and ready to go but if you look in the fruits table, it's empty. It doesn't have any fruits yet. 
+
+    * If we start our server in the terminal, `npm run server` and make a get request to fruits in Insomnia, it's going to return an empty array. It's not very useful for testing. 
+
+        * We should probably put some data in there
+
+    * In order to populate some sample data, we use seeds - case seeding. Seeds are just code that just connects to the database and tests data. That's it. 
+
+    * To create some seeds with knex, go into our terminal again and create some fruit seeds. `npx knex seed:make fruits`. Once you run that, you will see that there's a seeds folder that was created. It houses our new fruits seed file. 
+
+    * Inside of the function, we can literally call our query builder commands to insert some test data. We just call the knex('table_name').insert() or knex('table_name').del() or .truncate() to delete the table to start fresh. 
+
+    * Get rid of everything inside this seed function. We're going to start this from scratch.
+
+        * Make it an async/await function. 
+
+        * Clear out all the data of the fruits table. 
+          * Everything that might potentially be in there. We want to start from a predictable test data set. We just want to find 5 or 6 rows in there. If we had been calling the post endpoint and adding fruits of our own, we want to clear all those out before we seed our table. We can start from the same point every single time. 
+
+        * What can we call to clear out our table? Use `.del()` without a where() statement. 
+
+        * Reset the auto-incrementing ID. So instead of `.del()`, we can call `.truncate()`. That is going to 
+            
+            * Clear out our rows
+
+            * It does more than `.del()`, like resetting the auto-incrementing ID
+
+        * Call insert and insert some test data. 
+            
+            * We can pass in more than one row at a time by passing in an array.
+
+        * Go back to your command line. `npx knex seed:run`
+
+            * This command clears out your database, resetting everything.
+
+            * It also populates it with some fresh test data that you expect.
+
+            * `Ran 1 seed files`
+
+        * In DB Browser, it is now populated with some data in the Browse Data tab. 
+
+        * Make a post request to create a new fruit row. You should get a 201. 
+
+        * Refresh DBB. You should see your new strawberry row. 
+
+        * To reset it back to it's original state and remove the new row, just do seed:run in the terminal again. 
+
+        * Seeds are kind of like initial state with react. This is for testing purposes though. You never want to deploy this with your seed data because the seed data is really meant for local development and testing. It's not meant for your live users to interact with. 
+
+
+        * Final version of the seed file:
+
+        ```
+        exports.seed = async function(knex) {
+            await knex("fruits").truncate()
+
+            away knex("fruits").insert([
+                { name: "dragon fruit", avgWeightOz: 16.7, delicious: true, color: "red" },
+                { name: "durian", avgWeightOz: 52.9, delicious: false, color: "yellow" },
+                { name: "rambutan", avgWeightOz: 1.1, delicious: true, color: "pink" },
+                { name: "lingonberry", avgWeightOz: 0.01, delicious: true, color: "red" },
+                { name: "golden gooseberry", avgWeightOz: 0.02, delicious: true, color: "yellow" },
+            ])
+        }
+        ```
+
+### Done!
